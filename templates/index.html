@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Service marketplace platform for Nigeria - Connect with trusted service providers">
+    <meta name="theme-color" content="#008751">
+    <title>Naija Connect - Service Marketplace for Nigeria</title>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- IP Protection Notice -->
+    <meta name="copyright" content="Saint Works LTD">
+    <meta name="author" content="Saint Works LTD">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🇳🇬 Naija Connect</h1>
+                    <p class="tagline">Powered by Saint Works LTD</p>
+                </div>
+                <nav class="nav" id="mainNav">
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li id="authNav">
+                            <button class="btn btn-outline" onclick="showLogin()">Login</button>
+                            <button class="btn btn-primary" onclick="showRegister()">Register</button>
+                        </li>
+                        <li id="userNav" style="display: none;">
+                            <span id="userName"></span>
+                            <button class="btn btn-outline" onclick="logout()">Logout</button>
+                        </li>
+                    </ul>
+                </nav>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Find Trusted Service Providers in Nigeria</h2>
+                <p>Connect with professionals for all your service needs - from home repairs to professional services</p>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search for services...">
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="home">Home Services</option>
+                        <option value="professional">Professional Services</option>
+                        <option value="beauty">Beauty & Personal Care</option>
+                        <option value="tech">Tech & IT</option>
+                        <option value="events">Events & Entertainment</option>
+                        <option value="transport">Transport & Logistics</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="searchServices()">Search</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2>Available Services</h2>
+            <div id="servicesList" class="services-grid">
+                <!-- Services will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="categories">
+        <div class="container">
+            <h2>Popular Categories</h2>
+            <div class="categories-grid">
+                <div class="category-card" onclick="filterByCategory('home')">
+                    <span class="category-icon">🏠</span>
+                    <h3>Home Services</h3>
+                    <p>Plumbing, Electrical, Cleaning</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('professional')">
+                    <span class="category-icon">💼</span>
+                    <h3>Professional Services</h3>
+                    <p>Legal, Accounting, Consulting</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('beauty')">
+                    <span class="category-icon">💅</span>
+                    <h3>Beauty & Care</h3>
+                    <p>Salon, Spa, Barbering</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('tech')">
+                    <span class="category-icon">💻</span>
+                    <h3>Tech & IT</h3>
+                    <p>Development, Support, Repairs</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('events')">
+                    <span class="category-icon">🎉</span>
+                    <h3>Events</h3>
+                    <p>DJ, Photography, Catering</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('transport')">
+                    <span class="category-icon">🚗</span>
+                    <h3>Transport</h3>
+                    <p>Delivery, Moving, Logistics</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="about" class="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Browse Services</h3>
+                    <p>Search and explore verified service providers in your area</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Book Service</h3>
+                    <p>Select a provider and schedule your preferred date and time</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Make Payment</h3>
+                    <p>Secure payment processing in Nigerian Naira (₦)</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Leave Review</h3>
+                    <p>Rate and review your experience to help others</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Naija Connect</h3>
+                    <p>Nigeria's premier service marketplace</p>
+                    <p class="copyright">© 2026 Saint Works LTD. All rights reserved.</p>
+                    <p class="ip-notice">⚠️ Intellectual Property Protected</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#" onclick="showProviderRegistration()">Become a Provider</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@naijaconnect.ng</p>
+                    <p>Phone: +234 XXX XXX XXXX</p>
+                    <p>Lagos, Nigeria</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Login to Naija Connect</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+            <p class="modal-footer">Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Register on Naija Connect</h2>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="phone" required placeholder="+234">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required minlength="6">
+                </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" name="is_provider" id="isProvider">
+                    <label for="isProvider">I want to offer services as a provider</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+            <p class="modal-footer">Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('bookingModal')">&times;</span>
+            <h2>Book Service</h2>
+            <div id="bookingServiceDetails"></div>
+            <form id="bookingForm" onsubmit="handleBooking(event)">
+                <input type="hidden" name="service_id" id="bookingServiceId">
+                <div class="form-group">
+                    <label>Booking Date & Time</label>
+                    <input type="datetime-local" name="booking_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Additional Notes</label>
+                    <textarea name="notes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Service Details Modal -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeModal('serviceModal')">&times;</span>
+            <div id="serviceDetails"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard Modal -->
+    <div id="dashboardModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeModal('dashboardModal')">&times;</span>
+            <h2>My Dashboard</h2>
+            <div id="dashboardContent"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/service-worker-register.js"></script>
+</body>
+</html>
