@@ -1,0 +1,28 @@
+{
+  "name": "naija-connect",
+  "version": "1.0.0",
+  "description": "A comprehensive service marketplace platform for Nigeria",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "marketplace",
+    "services",
+    "nigeria",
+    "pwa"
+  ],
+  "author": "Saint Works LTD",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.3.0",
+    "stripe": "^14.11.0"
+  },
+  "devDependencies": {
+    "vercel": "^33.0.1"
+  }
+}
