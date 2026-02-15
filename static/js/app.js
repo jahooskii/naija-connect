@@ -160,7 +160,7 @@ async function loadServices(category = '', search = '') {
                 <div class="service-content">
                     <span class="category">${service.category}</span>
                     <h3>${service.title}</h3>
-                    <p>${service.description.substring(0, 100)}...</p>
+                    <p>${service.description.length > 100 ? service.description.substring(0, 100) + '...' : service.description}</p>
                     <div class="price">₦${service.price.toLocaleString()}</div>
                     <div class="location">📍 ${service.location || 'Nigeria'}</div>
                     <div>Provider: ${service.provider.name}</div>
