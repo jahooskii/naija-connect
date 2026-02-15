@@ -176,4 +176,4 @@ Building Nigeria's digital economy, one connection at a time.
 
 ---
 
-For support, visit our website or contact admin@naija-connect.com
+For support, contact admin@naija-connect.com or create an issue on GitHub.
