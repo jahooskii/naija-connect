@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Naija Connect</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="/" class="logo">🇳🇬 Naija Connect</a>
+            <ul class="nav-links">
+                <li><a href="/pages/dashboard.html">Dashboard</a></li>
+                <li><a href="#" id="userName">User</a></li>
+                <li><a href="#" onclick="logout(); return false;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>My Dashboard</h1>
+                <button class="btn btn-primary" onclick="showCreateServiceForm()">+ Create Service</button>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid" id="stats">
+                <div class="stat-card">
+                    <h3>Active Bookings</h3>
+                    <div class="stat-value" id="activeBookings">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Services</h3>
+                    <div class="stat-value" id="totalServices">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Earned</h3>
+                    <div class="stat-value" id="totalEarned">₦0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Rating</h3>
+                    <div class="stat-value" id="avgRating">0.0</div>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <section style="margin-top: 3rem;">
+                <h2>Browse Services</h2>
+                <div class="service-grid" id="servicesGrid">
+                    <div class="loading">Loading services...</div>
+                </div>
+            </section>
+
+            <!-- My Bookings -->
+            <section style="margin-top: 3rem;">
+                <h2>My Bookings</h2>
+                <div id="bookingsContainer">
+                    <div class="loading">Loading bookings...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Naija Connect. Powered by Saint Works LTD.</p>
+        </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Check authentication
+        if (!requireAuth()) {
+            // Will redirect to login
+        }
+
+        // Display user name
+        displayUserInfo('userName');
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load services
+                const servicesData = await servicesAPI.getAll();
+                const servicesGrid = document.getElementById('servicesGrid');
+                
+                if (servicesData.services && servicesData.services.length > 0) {
+                    servicesGrid.innerHTML = servicesData.services
+                        .map(service => createServiceCard(service))
+                        .join('');
+                } else {
+                    servicesGrid.innerHTML = '<p>No services available yet.</p>';
+                }
+
+                // Load bookings
+                const bookingsData = await bookingsAPI.getAll();
+                const bookingsContainer = document.getElementById('bookingsContainer');
+                
+                if (bookingsData.bookings && bookingsData.bookings.length > 0) {
+                    bookingsContainer.innerHTML = bookingsData.bookings
+                        .map(booking => createBookingCard(booking))
+                        .join('');
+                    
+                    // Update stats
+                    const activeBookings = bookingsData.bookings.filter(b => 
+                        b.status === 'pending' || b.status === 'confirmed'
+                    ).length;
+                    document.getElementById('activeBookings').textContent = activeBookings;
+                } else {
+                    bookingsContainer.innerHTML = '<p>No bookings yet.</p>';
+                }
+
+                // Update service count
+                document.getElementById('totalServices').textContent = servicesData.services?.length || 0;
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError(document.getElementById('servicesGrid'), 'Failed to load dashboard data');
+            }
+        }
+
+        function showCreateServiceForm() {
+            // For now, just alert - in full implementation would show modal or navigate to form
+            alert('Service creation form would appear here. This feature requires additional UI implementation.');
+        }
+
+        // Load data on page load
+        loadDashboard();
+    </script>
+</body>
+</html>

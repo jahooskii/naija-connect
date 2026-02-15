@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Naija Connect</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .qr-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .qr-code {
+            max-width: 300px;
+            margin: 1rem auto;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="/" class="logo">🇳🇬 Naija Connect Admin</a>
+            <ul class="nav-links">
+                <li><a href="/pages/admin-dashboard.html">Dashboard</a></li>
+                <li><a href="#" id="userName">Admin</a></li>
+                <li><a href="#" onclick="logout(); return false;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Admin Dashboard</h1>
+                <button class="btn btn-primary" onclick="refreshStats()">🔄 Refresh</button>
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="qr-section">
+                <h2>App QR Code</h2>
+                <p>Scan to access Naija Connect</p>
+                <div class="qr-code" id="qrCode">
+                    <!-- QR Code will be generated here -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://naija-connect.vercel.app" alt="Naija Connect QR Code" style="width: 100%;">
+                </div>
+                <p style="margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
+                    URL: <span id="appUrl">https://naija-connect.vercel.app</span>
+                </p>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="stats-grid" id="keyMetrics">
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <div class="stat-value" id="totalUsers">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Services</h3>
+                    <div class="stat-value" id="totalServices">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Bookings</h3>
+                    <div class="stat-value" id="totalBookings">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Revenue</h3>
+                    <div class="stat-value" id="totalRevenue">₦0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Platform Commission (12%)</h3>
+                    <div class="stat-value" id="totalCommission">₦0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Providers</h3>
+                    <div class="stat-value" id="activeProviders">0</div>
+                </div>
+            </div>
+
+            <!-- Analytics -->
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <h3>Booking Status Distribution</h3>
+                    <div id="bookingStats"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>Services by Category</h3>
+                    <div id="categoryStats"></div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings -->
+            <section style="margin-top: 2rem;">
+                <h2>Recent Bookings</h2>
+                <div id="recentBookings">
+                    <div class="loading">Loading recent bookings...</div>
+                </div>
+            </section>
+
+            <!-- NRS Compliance Notice -->
+            <div style="background: #FFF3CD; padding: 1rem; border-radius: 8px; margin-top: 2rem;">
+                <h4 style="color: #856404;">📋 NRS Tax Compliance</h4>
+                <p style="color: #856404; margin-top: 0.5rem;">
+                    Platform operates with 12% commission in compliance with Nigerian Revenue Service (NRS) regulations.
+                    All transactions are tracked for tax reporting purposes.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Naija Connect. Powered by Saint Works LTD.</p>
+        </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Check admin authentication
+        if (!requireAdmin()) {
+            // Will redirect if not admin
+        }
+
+        // Display admin name
+        displayUserInfo('userName');
+
+        // Update QR code with current URL
+        const currentUrl = window.location.origin;
+        document.getElementById('appUrl').textContent = currentUrl;
+        const qrCodeImg = document.querySelector('#qrCode img');
+        qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(currentUrl)}`;
+
+        // Load admin statistics
+        async function loadAdminStats() {
+            try {
+                const statsData = await adminAPI.getStats();
+                const stats = statsData.stats;
+
+                // Update key metrics
+                document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                document.getElementById('totalServices').textContent = stats.totalServices || 0;
+                document.getElementById('totalBookings').textContent = stats.totalBookings || 0;
+                document.getElementById('totalRevenue').textContent = formatCurrency(stats.totalRevenue || 0);
+                document.getElementById('totalCommission').textContent = formatCurrency(stats.totalCommission || 0);
+
+                // Display booking stats
+                const bookingStatsDiv = document.getElementById('bookingStats');
+                if (stats.bookingStats && stats.bookingStats.length > 0) {
+                    bookingStatsDiv.innerHTML = stats.bookingStats.map(stat => `
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>${stat._id || 'Unknown'}:</strong> ${stat.count} bookings (${formatCurrency(stat.totalRevenue || 0)})
+                        </div>
+                    `).join('');
+                } else {
+                    bookingStatsDiv.innerHTML = '<p>No booking data yet.</p>';
+                }
+
+                // Display category stats
+                const categoryStatsDiv = document.getElementById('categoryStats');
+                if (stats.servicesByCategory && stats.servicesByCategory.length > 0) {
+                    categoryStatsDiv.innerHTML = stats.servicesByCategory.map(cat => `
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>${cat._id || 'Uncategorized'}:</strong> ${cat.count} services
+                        </div>
+                    `).join('');
+                } else {
+                    categoryStatsDiv.innerHTML = '<p>No category data yet.</p>';
+                }
+
+                // Display recent bookings
+                const recentBookingsDiv = document.getElementById('recentBookings');
+                if (stats.recentBookings && stats.recentBookings.length > 0) {
+                    recentBookingsDiv.innerHTML = stats.recentBookings
+                        .map(booking => createBookingCard(booking))
+                        .join('');
+                } else {
+                    recentBookingsDiv.innerHTML = '<p>No recent bookings.</p>';
+                }
+
+            } catch (error) {
+                console.error('Error loading admin stats:', error);
+                showError(document.getElementById('keyMetrics'), 'Failed to load admin statistics. ' + error.message);
+            }
+        }
+
+        function refreshStats() {
+            loadAdminStats();
+        }
+
+        // Load data on page load
+        loadAdminStats();
+    </script>
+</body>
+</html>
