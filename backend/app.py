@@ -752,14 +752,6 @@ def track_provider(tracking_code):
     # For now, redirect to provider's services
     return redirect(f'/?provider={provider.id}')
 
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    import os
-    port = int(os.environ.get('PORT', 8000))
-    app.run(debug=False, host='0.0.0.0', port=port)
-
 # ============================================
 # REFERRAL SYSTEM ENDPOINTS
 # ============================================
@@ -945,3 +937,9 @@ def admin_withdrawals():
     
     return jsonify(withdrawals)
 
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    import os
+    port = int(os.environ.get('PORT', 8000))
+    app.run(debug=False, host='0.0.0.0', port=port)
