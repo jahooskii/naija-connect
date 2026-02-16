@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Naija Connect - Admin Dashboard">
+    <meta name="theme-color" content="#008751">
+    <title>Naija Connect - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #008751;
+            --secondary-color: #FF6B35;
+            --accent-color: #004D2E;
+            --text-dark: #1a1a1a;
+            --text-light: #666666;
+            --bg-light: #f5f5f5;
+            --bg-white: #ffffff;
+            --border-color: #e0e0e0;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Admin Login Page */
+        .admin-login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            padding: 20px;
+        }
+
+        .login-box {
+            background: var(--bg-white);
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(0, 135, 81, 0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: var(--bg-white);
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-btn:hover {
+            background: var(--accent-color);
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .error-message {
+            background: #ffe0e0;
+            color: var(--danger-color);
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Admin Dashboard */
+        .admin-dashboard {
+            display: none;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            background: var(--bg-light);
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--text-dark);
+            color: var(--bg-white);
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: var(--bg-white);
+            text-decoration: none;
+            padding: 12px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: var(--primary-color);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+        }
+
+        .top-bar {
+            background: var(--bg-white);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-white);
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: var(--danger-color);
+            color: var(--bg-white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .dashboard-content {
+            padding: 30px;
+        }
+
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-card h3 {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .data-table {
+            background: var(--bg-white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--primary-color);
+            color: var(--bg-white);
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: var(--warning-color);
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: var(--danger-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-edit {
+            background: var(--info-color);
+            color: var(--bg-white);
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: var(--bg-white);
+        }
+
+        .btn-view {
+            background: var(--primary-color);
+            color: var(--bg-white);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-content {
+                padding: 15px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 70px;
+                padding: 15px;
+            }
+
+            .sidebar-logo {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+
+            .sidebar-menu a {
+                padding: 10px 5px;
+                text-align: center;
+                font-size: 12px;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .top-bar h2 {
+                font-size: 18px;
+            }
+
+            .top-bar {
+                padding: 15px;
+            }
+
+            .dashboard-content {
+                padding: 10px;
+            }
+
+            .login-box {
+                padding: 20px;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: var(--success-color);
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Share & QR section */
+        .share-hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .share-hero h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .share-hero p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .share-cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--bg-white);
+            font-weight: 600;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h4 {
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .qr-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-light);
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 240px;
+        }
+
+        .qr-preview img {
+            max-width: 220px;
+            width: 100%;
+            height: auto;
+        }
+
+        .qr-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--bg-white);
+            border-color: var(--primary-color);
+        }
+
+        .btn-secondary {
+            background: var(--bg-white);
+            color: var(--text-dark);
+            border-color: var(--border-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .table-like {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .table-like th,
+        .table-like td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .table-like th {
+            background: var(--bg-light);
+            font-size: 13px;
+        }
+
+        .stat-kpi {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .kpi {
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--bg-light);
+        }
+
+        .text-light {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Login Section -->
+    <div id="adminLogin" class="admin-login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>Naija Connect</h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="adminUsername">Username</label>
+                    <input type="text" id="adminUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login to Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Section -->
+    <div id="adminDashboard" class="admin-dashboard">
+        <div class="dashboard-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-logo">Naija Connect</div>
+                <ul class="sidebar-menu">
+                    <li><a href="#" class="menu-link active" data-section="overview">📊 Overview</a></li>
+                    <li><a href="#" class="menu-link" data-section="users">👥 Users</a></li>
+                    <li><a href="#" class="menu-link" data-section="services">🔧 Services</a></li>
+                    <li><a href="#" class="menu-link" data-section="bookings">📅 Bookings</a></li>
+                    <li><a href="#" class="menu-link" data-section="reviews">⭐ Reviews</a></li>
+                    <li><a href="#" class="menu-link" data-section="payments">💳 Payments</a></li>
+                    <li><a href="#" class="menu-link" data-section="analytics">📈 Analytics</a></li>
+                    <li style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                        <a href="#" id="logoutLink">🚪 Logout</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Top Bar -->
+                <div class="top-bar">
+                    <h2 id="pageTitle">Overview</h2>
+                    <div class="admin-user">
+                        <div style="text-align: right;">
+                            <div style="font-weight: 600;" id="adminName">Admin</div>
+                            <div style="font-size: 12px; color: var(--text-light);">Administrator</div>
+                        </div>
+                        <button class="logout-btn" id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div class="dashboard-content">
+                    <!-- Overview Section -->
+                    <div id="overview" class="dashboard-section active">
+                        <h2>Dashboard Overview</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Total Users</h3>
+                                <div class="number" id="totalUsers">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total Services</h3>
+                                <div class="number" id="totalServices">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total Bookings</h3>
+                                <div class="number" id="totalBookings">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total Revenue</h3>
+                                <div class="number" id="totalRevenue">₦0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Share & QR Section -->
+                    <div id="share" class="dashboard-section">
+                        <div class="share-hero">
+                            <div>
+                                <div class="pill">🎯 Naija Connect Admin Dashboard</div>
+                                <h3>Real-time analytics, revenue tracking, and user monitoring</h3>
+                                <p>Launch a shareable QR code, copy links, or push to WhatsApp in one click.</p>
+                                <div class="share-cta" style="margin-top: 12px;">
+                                    <span class="pill">📱 Launch QR Code</span>
+                                    <span class="pill">🔗 Share across social</span>
+                                    <span class="pill">💬 One-tap WhatsApp</span>
+                                </div>
+                            </div>
+                            <div class="card" style="background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.2);">
+                                <h4>📥 Actions</h4>
+                                <div class="qr-actions">
+                                    <button class="btn btn-primary" id="btnDownloadQr">📥 Download QR Code</button>
+                                    <button class="btn btn-secondary" id="btnCopyLink">🔗 Copy Share Link</button>
+                                    <button class="btn btn-secondary" id="btnWhatsapp">💬 Share on WhatsApp</button>
+                                </div>
+                                <div class="badge" style="margin-top: 12px; background: rgba(255,255,255,0.12); color:#fff;">🔒 Admin only — secure share link</div>
+                            </div>
+                        </div>
+
+                        <div class="qr-grid">
+                            <div class="card">
+                                <h4>📱 Launch QR Code</h4>
+                                <p style="color: var(--text-light); margin-bottom: 10px;">Scan to access the app or share on social media.</p>
+                                <div class="qr-preview">
+                                    <img id="qrImage" alt="Naija Connect QR" loading="lazy">
+                                </div>
+                                <div style="margin-top: 12px; word-break: break-all; font-size: 13px; color: var(--text-light);">
+                                    <strong>Share link:</strong> <span id="shareLinkText"></span>
+                                </div>
+                                <div class="qr-actions">
+                                    <button class="btn btn-primary" id="btnRefreshQr">🔄 Regenerate</button>
+                                    <button class="btn btn-secondary" id="btnDownloadQr2">⬇️ Save PNG</button>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h4>💰 Revenue Breakdown (NRS Compliant)</h4>
+                                <div class="mini-grid">
+                                    <div class="kpi"><div class="text-light">Total Bookings Value (GMV)</div><div class="highlight" id="gmvValue">₦8,710,000</div></div>
+                                    <div class="kpi"><div class="text-light">Commission Rate (12%)</div><div class="highlight" id="commissionValue">₦1,045,200</div></div>
+                                    <div class="kpi"><div class="text-light">Operating Costs (10%)</div><div class="highlight" id="opexValue">₦871,000</div></div>
+                                    <div class="kpi"><div class="text-light">Net Profit (2%)</div><div class="highlight" id="profitValue">₦174,200</div></div>
+                                </div>
+                                <div class="badge" style="margin-top: 10px;">✅ NRS Tax Compliance: All commissions tracked for Nigerian Revenue Service reporting.</div>
+                            </div>
+
+                            <div class="card">
+                                <h4>📈 User Growth & Revenue</h4>
+                                <div class="stat-kpi">
+                                    <div class="kpi"><div class="text-light">Total Users</div><div class="highlight" id="kpiUsers">45</div><div class="text-light">↑ 0% this week</div></div>
+                                    <div class="kpi"><div class="text-light">Total Revenue</div><div class="highlight" id="kpiRevenue">₦1,045,200</div><div class="text-light">Commission earned</div></div>
+                                    <div class="kpi"><div class="text-light">Total Bookings</div><div class="highlight" id="kpiBookings">87</div><div class="text-light">This month</div></div>
+                                    <div class="kpi"><div class="text-light">Avg Commission</div><div class="highlight">12%</div><div class="text-light">NRS compliant</div></div>
+                                    <div class="kpi"><div class="text-light">Active Providers</div><div class="highlight" id="kpiProviders">23</div><div class="text-light">Growing daily</div></div>
+                                    <div class="kpi"><div class="text-light">Avg Booking Value</div><div class="highlight">₦12,000</div><div class="text-light">Nigerian Naira</div></div>
+                                </div>
+                                <div class="badge" style="margin-top: 10px;">📊 Monthly Projection (1000 bookings): <span class="highlight" id="kpiProjection">₦12,013,793</span></div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-bottom: 14px;">
+                            <h4>USER ID | NAME | EMAIL | ROLE | JOINED | BOOKINGS | REVENUE GENERATED | STATUS</h4>
+                            <table class="table-like">
+                                <thead>
+                                    <tr>
+                                        <th>USER ID</th><th>NAME</th><th>EMAIL</th><th>ROLE</th><th>JOINED</th><th>BOOKINGS</th><th>REVENUE</th><th>STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shareUsersTable">
+                                    <tr><td>user1</td><td>John Customer</td><td>john@example.com</td><td>Customer</td><td>10/02/2026</td><td>5</td><td>₦150,000</td><td>Active</td></tr>
+                                    <tr><td>user2</td><td>Jane Provider</td><td>jane@example.com</td><td>Provider</td><td>08/02/2026</td><td>12</td><td>₦250,000</td><td>Active</td></tr>
+                                    <tr><td>user3</td><td>Ahmed Lagos</td><td>ahmed@example.com</td><td>Customer</td><td>12/02/2026</td><td>2</td><td>₦60,000</td><td>Active</td></tr>
+                                    <tr><td>user4</td><td>Blessing Abuja</td><td>blessing@example.com</td><td>Provider</td><td>09/02/2026</td><td>8</td><td>₦180,000</td><td>Active</td></tr>
+                                    <tr><td>user5</td><td>Chidi Port Harcourt</td><td>chidi@example.com</td><td>Customer</td><td>13/02/2026</td><td>1</td><td>₦45,000</td><td>Pending</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card">
+                            <h4>🎁 Referral Program Stats</h4>
+                            <div class="mini-grid">
+                                <div class="kpi"><div class="text-light">Total Referrals</div><div class="highlight" id="refTotal">12</div><div class="text-light">Users brought in</div></div>
+                                <div class="kpi"><div class="text-light">Referral Earnings</div><div class="highlight" id="refEarnings">₦6,000</div><div class="text-light">₦500 per referral</div></div>
+                                <div class="kpi"><div class="text-light">Conversion Rate</div><div class="highlight" id="refConversion">45.0%</div><div class="text-light">Visits → Signups</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Section -->
+                    <div id="users" class="dashboard-section">
+                        <h2>Users Management</h2>
+                        <div class="data-table">
+                            <table id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 40px;">Loading users...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Services Section -->
+                    <div id="services" class="dashboard-section">
+                        <h2>Services Management</h2>
+                        <div class="data-table">
+                            <table id="servicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Provider</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 40px;">Loading services...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Bookings Section -->
+                    <div id="bookings" class="dashboard-section">
+                        <h2>Bookings Management</h2>
+                        <div class="data-table">
+                            <table id="bookingsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Customer</th>
+                                        <th>Service</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 40px;">Loading bookings...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Reviews Section -->
+                    <div id="reviews" class="dashboard-section">
+                        <h2>Reviews Management</h2>
+                        <div class="data-table">
+                            <table id="reviewsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Reviewer</th>
+                                        <th>Service</th>
+                                        <th>Rating</th>
+                                        <th>Comment</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 40px;">Loading reviews...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Payments Section -->
+                    <div id="payments" class="dashboard-section">
+                        <h2>Payments Management</h2>
+                        <div class="data-table">
+                            <table id="paymentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User</th>
+                                        <th>Booking</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 40px;">Loading payments...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div id="analytics" class="dashboard-section">
+                        <h2>Analytics & Reports</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Active Services</h3>
+                                <div class="number" id="activeServices">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Completed Bookings</h3>
+                                <div class="number" id="completedBookings">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Avg Rating</h3>
+                                <div class="number" id="avgRating">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Pending Reviews</h3>
+                                <div class="number" id="pendingReviews">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.origin + '/api';
+        const SHARE_TARGET = window.location.origin;
+        let adminToken = localStorage.getItem('adminToken');
+        let currentAdmin = JSON.parse(localStorage.getItem('currentAdmin') || '{}');
+
+        // Initialize share section once DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            initShareSection();
+        });
+
+        // Check if admin is already logged in
+        if (adminToken) {
+            showDashboard();
+        }
+
+        // Admin Login
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('errorMessage');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    adminToken = data.token;
+                    currentAdmin = data.user;
+                    localStorage.setItem('adminToken', adminToken);
+                    localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
+                    showDashboard();
+                } else {
+                    errorDiv.textContent = data.message || 'Login failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Connection error. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        function showDashboard() {
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            document.getElementById('adminName').textContent = currentAdmin.full_name || currentAdmin.username;
+            loadDashboardData();
+            initShareSection();
+        }
+
+        // Menu Navigation
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.getAttribute('data-section');
+                
+                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+                
+                document.getElementById('pageTitle').textContent = link.textContent.trim();
+                loadSectionData(section);
+            });
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('logoutLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('currentAdmin');
+            location.reload();
+        }
+
+        // Load Dashboard Data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/analytics`, {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalUsers').textContent = data.total_users || 0;
+                    document.getElementById('totalServices').textContent = data.total_services || 0;
+                    document.getElementById('totalBookings').textContent = data.total_bookings || 0;
+                    document.getElementById('totalRevenue').textContent = `₦${(data.total_revenue || 0).toLocaleString()}`;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load Section Data
+        async function loadSectionData(section) {
+            try {
+                let endpoint = '';
+                switch(section) {
+                    case 'users':
+                        endpoint = '/users';
+                        break;
+                    case 'services':
+                        endpoint = '/services';
+                        break;
+                    case 'bookings':
+                        endpoint = '/bookings';
+                        break;
+                    case 'reviews':
+                        endpoint = '/reviews';
+                        break;
+                    case 'payments':
+                        endpoint = '/payments';
+                        break;
+                    case 'share':
+                        initShareSection();
+                        return;
+                    case 'analytics':
+                        loadDashboardData();
+                        return;
+                }
+                
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    populateTable(section, data.data || []);
+                }
+            } catch (error) {
+                console.error(`Error loading ${section}:`, error);
+            }
+        }
+
+        // Populate Tables
+        function populateTable(section, items) {
+            const tableId = `${section}Table`;
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            const tbody = table.querySelector('tbody');
+            
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px;">No data available</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = items.map((item, index) => {
+                let row = `<tr><td>${item.id || index + 1}</td>`;
+                
+                switch(section) {
+                    case 'users':
+                        row += `
+                            <td>${item.username}</td>
+                            <td>${item.email}</td>
+                            <td>${item.is_provider ? 'Provider' : 'Customer'}</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>${new Date(item.created_at).toLocaleDateString()}</td>
+                            <td><div class="action-buttons"><button class="action-btn btn-view">View</button><button class="action-btn btn-delete">Delete</button></div></td>
+                        `;
+                        break;
+                    case 'services':
+                        row += `
+                            <td>${item.name}</td>
+                            <td>${item.provider?.username || 'N/A'}</td>
+                            <td>${item.category}</td>
+                            <td>₦${item.price}</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td><div class="action-buttons"><button class="action-btn btn-view">View</button><button class="action-btn btn-delete">Remove</button></div></td>
+                        `;
+                        break;
+                    case 'bookings':
+                        row += `
+                            <td>${item.customer?.username || 'N/A'}</td>
+                            <td>${item.service?.name || 'N/A'}</td>
+                            <td>${new Date(item.booking_date).toLocaleDateString()}</td>
+                            <td><span class="status-badge status-pending">${item.status}</span></td>
+                            <td>₦${item.service?.price || 0}</td>
+                            <td><div class="action-buttons"><button class="action-btn btn-view">View</button></div></td>
+                        `;
+                        break;
+                    case 'reviews':
+                        row += `
+                            <td>${item.reviewer?.username || 'N/A'}</td>
+                            <td>${item.service?.name || 'N/A'}</td>
+                            <td>${item.rating}⭐</td>
+                            <td>${item.comment?.substring(0, 30)}...</td>
+                            <td><span class="status-badge status-active">Approved</span></td>
+                            <td><div class="action-buttons"><button class="action-btn btn-delete">Remove</button></div></td>
+                        `;
+                        break;
+                    case 'payments':
+                        row += `
+                            <td>${item.user?.username || 'N/A'}</td>
+                            <td>${item.booking?.id || 'N/A'}</td>
+                            <td>₦${item.amount}</td>
+                            <td>${item.payment_method}</td>
+                            <td><span class="status-badge status-active">${item.status}</span></td>
+                            <td>${new Date(item.payment_date).toLocaleDateString()}</td>
+                        `;
+                        break;
+                }
+                
+                row += '</tr>';
+                return row;
+            }).join('');
+        }
+
+        // Share & QR section helpers
+        function initShareSection() {
+            const linkEl = document.getElementById('shareLinkText');
+            const qrImage = document.getElementById('qrImage');
+            if (!linkEl || !qrImage) return;
+
+            linkEl.textContent = SHARE_TARGET;
+            renderQRCode();
+            updateShareKPIs();
+
+            const downloadBtns = [
+                document.getElementById('btnDownloadQr'),
+                document.getElementById('btnDownloadQr2')
+            ];
+            downloadBtns.forEach(btn => btn && btn.addEventListener('click', downloadQRCode));
+
+            const copyBtn = document.getElementById('btnCopyLink');
+            if (copyBtn) copyBtn.addEventListener('click', copyShareLink);
+
+            const waBtn = document.getElementById('btnWhatsapp');
+            if (waBtn) waBtn.addEventListener('click', shareWhatsApp);
+
+            const refreshBtn = document.getElementById('btnRefreshQr');
+            if (refreshBtn) refreshBtn.addEventListener('click', renderQRCode);
+        }
+
+        function renderQRCode() {
+            const qrImage = document.getElementById('qrImage');
+            if (!qrImage) return;
+            // Use external QR generator for simplicity; keeps UI fast and portable.
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=10&data=${encodeURIComponent(SHARE_TARGET + '/#about')}`;
+            qrImage.src = qrUrl;
+        }
+
+        async function downloadQRCode() {
+            const qrImage = document.getElementById('qrImage');
+            if (!qrImage) return;
+            try {
+                const response = await fetch(qrImage.src);
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'naija-connect-qr.png';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('QR download failed', err);
+            }
+        }
+
+        async function copyShareLink() {
+            try {
+                await navigator.clipboard.writeText(SHARE_TARGET + '/#about');
+                alert('Share link copied!');
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+        }
+
+        function shareWhatsApp() {
+            const msg = `Join me on Naija Connect: ${SHARE_TARGET}/#about`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function updateShareKPIs() {
+            // Static demo numbers from the requested layout; replace with live analytics when available.
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+            setText('gmvValue', '₦8,710,000');
+            setText('commissionValue', '₦1,045,200');
+            setText('opexValue', '₦871,000');
+            setText('profitValue', '₦174,200');
+            setText('kpiUsers', '45');
+            setText('kpiRevenue', '₦1,045,200');
+            setText('kpiBookings', '87');
+            setText('kpiProviders', '23');
+            setText('kpiProjection', '₦12,013,793');
+            setText('refTotal', '12');
+            setText('refEarnings', '₦6,000');
+            setText('refConversion', '45.0%');
+            const shareLink = document.getElementById('shareLinkText');
+            if (shareLink) shareLink.textContent = SHARE_TARGET + '/#about';
+        }
+
+        // Refresh data every 30 seconds
+        setInterval(() => {
+            const activeSection = document.querySelector('.dashboard-section.active');
+            if (activeSection) {
+                loadSectionData(activeSection.id);
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

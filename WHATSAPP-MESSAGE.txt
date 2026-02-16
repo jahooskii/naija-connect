@@ -1,0 +1,15 @@
+🇳🇬 **Naija Connect - Service Marketplace** 🚀
+
+Book services easily! Home services, beauty, tech support & more.
+
+📲 **Access the app:**
+http://192.168.1.231:8000
+
+✅ Works on iPhone, Android & all devices
+✅ Add to home screen for app-like experience
+✅ No download required - just click the link!
+
+*Make sure you're on the same Wi-Fi network*
+
+---
+Powered by Saint Works LTD
