@@ -40,7 +40,7 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-        referral_code = db.Column(db.String(20), unique=True)
+    referral_code = db.Column(db.String(20), unique=True)
     referred_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     referral_earnings = db.Column(db.Float, default=0.0)
     total_referrals = db.Column(db.Integer, default=0)
