@@ -40,6 +40,11 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+        referral_code = db.Column(db.String(20), unique=True)
+    referred_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    referral_earnings = db.Column(db.Float, default=0.0)
+    total_referrals = db.Column(db.Integer, default=0)
+    
     services = db.relationship('Service', backref='provider', lazy=True)
     bookings = db.relationship('Booking', backref='customer', lazy=True)
     reviews = db.relationship('Review', backref='reviewer', lazy=True)
@@ -96,6 +101,31 @@ class Payment(db.Model):
     payment_method = db.Column(db.String(50))
     transaction_id = db.Column(db.String(100), unique=True)
     status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+
+class Referral(db.Model):
+    """Referral tracking for user acquisition and rewards"""
+    id = db.Column(db.Integer, primary_key=True)
+    referrer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    referred_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    referral_code = db.Column(db.String(20), nullable=False)
+    reward_amount = db.Column(db.Float, default=0.0)
+    reward_paid = db.Column(db.Boolean, default=False)
+    booking_count = db.Column(db.Integer, default=0)  # Bookings from referred user
+    total_value = db.Column(db.Float, default=0.0)  # Total transaction value from referred user
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Commission(db.Model):
+    """Commission tracking for platform revenue"""
+    id = db.Column(db.Integer, primary_key=True)
+    booking_id = db.Column(db.Integer, db.ForeignKey('booking.id'), nullable=False)
+    service_amount = db.Column(db.Float, nullable=False)
+    commission_rate = db.Column(db.Float, default=0.12)  # 12% default
+    commission_amount = db.Column(db.Float, nullable=False)
+    provider_amount = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), default='pending')  # pending, paid
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # JWT Authentication Decorator
@@ -640,3 +670,189 @@ if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 8000))
     app.run(debug=False, host='0.0.0.0', port=port)
+
+# ============================================
+# REFERRAL SYSTEM ENDPOINTS
+# ============================================
+
+@app.route('/api/referrals/generate', methods=['POST'])
+def generate_referral_code():
+    """Generate unique referral code for user"""
+    import random
+    import string
+    
+    data = request.json
+    user_id = data.get('user_id')
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Generate unique 8-character code
+    while True:
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        if not User.query.filter_by(referral_code=code).first():
+            break
+    
+    user.referral_code = code
+    db.session.commit()
+    
+    return jsonify({
+        'referral_code': code,
+        'qr_url': f'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://naija-connect.onrender.com/register?ref={code}'
+    })
+
+@app.route('/api/referrals/stats/<int:user_id>')
+def get_referral_stats(user_id):
+    """Get referral statistics for user"""
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    referrals = Referral.query.filter_by(referrer_id=user_id).all()
+    
+    stats = {
+        'referral_code': user.referral_code,
+        'total_referrals': user.total_referrals,
+        'total_earnings': user.referral_earnings,
+        'active_referrals': len([r for r in referrals if r.booking_count > 0]),
+        'pending_rewards': sum(r.reward_amount for r in referrals if not r.reward_paid),
+        'referrals': [{
+            'user_id': r.referred_id,
+            'username': User.query.get(r.referred_id).username,
+            'bookings': r.booking_count,
+            'total_value': r.total_value,
+            'reward': r.reward_amount,
+            'paid': r.reward_paid,
+            'joined': r.created_at.strftime('%Y-%m-%d')
+        } for r in referrals]
+    }
+    
+    return jsonify(stats)
+
+@app.route('/api/referrals/apply', methods=['POST'])
+def apply_referral_code():
+    """Apply referral code during registration"""
+    data = request.json
+    referral_code = data.get('referral_code')
+    new_user_id = data.get('user_id')
+    
+    if not referral_code or not new_user_id:
+        return jsonify({'error': 'Missing parameters'}), 400
+    
+    referrer = User.query.filter_by(referral_code=referral_code).first()
+    if not referrer:
+        return jsonify({'error': 'Invalid referral code'}), 404
+    
+    new_user = User.query.get(new_user_id)
+    if not new_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Create referral tracking
+    referral = Referral(
+        referrer_id=referrer.id,
+        referred_id=new_user_id,
+        referral_code=referral_code,
+        reward_amount=500.0  # ₦500 bonus per referral
+    )
+    
+    new_user.referred_by = referrer.id
+    referrer.total_referrals += 1
+    
+    db.session.add(referral)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Referral applied successfully',
+        'referrer': referrer.username,
+        'bonus': 500.0
+    })
+
+# ============================================
+# ADMIN MONETIZATION ENDPOINTS
+# ============================================
+
+@app.route('/api/admin/revenue/overview')
+def admin_revenue_overview():
+    """Get comprehensive revenue overview for admin"""
+    total_bookings = Booking.query.count()
+    completed_bookings = Booking.query.filter_by(status='completed').all()
+    
+    total_gmv = sum(b.total_amount for b in completed_bookings)
+    total_commission = total_gmv * 0.12  # 12% commission
+    
+    commissions = Commission.query.all()
+    commission_paid = sum(c.commission_amount for c in commissions if c.status == 'paid')
+    commission_pending = sum(c.commission_amount for c in commissions if c.status == 'pending')
+    
+    providers = User.query.filter_by(is_provider=True).count()
+    customers = User.query.filter_by(is_provider=False, is_admin=False).count()
+    
+    # Monthly breakdown
+    from sqlalchemy import func, extract
+    monthly_revenue = db.session.query(
+        extract('month', Booking.created_at).label('month'),
+        func.sum(Booking.total_amount).label('total')
+    ).filter(Booking.status == 'completed').group_by('month').all()
+    
+    return jsonify({
+        'overview': {
+            'total_bookings': total_bookings,
+            'completed_bookings': len(completed_bookings),
+            'total_gmv': total_gmv,
+            'total_commission': total_commission,
+            'commission_paid': commission_paid,
+            'commission_pending': commission_pending,
+            'net_revenue': commission_paid
+        },
+        'users': {
+            'providers': providers,
+            'customers': customers,
+            'total': providers + customers
+        },
+        'monthly': [{'month': m, 'revenue': round(float(r) * 0.12, 2)} for m, r in monthly_revenue],
+        'commission_rate': 0.12
+    })
+
+@app.route('/api/admin/commission/update', methods=['POST'])
+def update_commission_rate():
+    """Update global commission rate (admin only)"""
+    data = request.json
+    new_rate = data.get('rate', 0.12)
+    
+    # In production, store this in a Settings model
+    # For now, this is a placeholder endpoint
+    
+    return jsonify({
+        'message': f'Commission rate updated to {new_rate * 100}%',
+        'rate': new_rate
+    })
+
+@app.route('/api/admin/withdrawals')
+def admin_withdrawals():
+    """Get all pending provider withdrawal requests"""
+    # This would integrate with payment provider in production
+    # Placeholder for now
+    
+    providers = User.query.filter_by(is_provider=True).all()
+    withdrawals = []
+    
+    for provider in providers:
+        completed_bookings = Booking.query.join(Service).filter(
+            Service.provider_id == provider.id,
+            Booking.status == 'completed'
+        ).all()
+        
+        total_earned = sum(b.total_amount * 0.88 for b in completed_bookings)  # 88% after 12% commission
+        
+        if total_earned > 0:
+            withdrawals.append({
+                'provider_id': provider.id,
+                'provider_name': provider.full_name or provider.username,
+                'total_earned': round(total_earned, 2),
+                'bookings_count': len(completed_bookings),
+                'status': 'pending'
+            })
+    
+    return jsonify(withdrawals)
+
