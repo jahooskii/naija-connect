@@ -937,6 +937,12 @@ def admin_withdrawals():
     
     return jsonify(withdrawals)
 
+
+@app.route('/offline.html')
+def offline():
+    """Offline fallback page for PWA"""
+    return render_template('offline.html')
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
