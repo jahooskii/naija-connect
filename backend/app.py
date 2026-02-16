@@ -44,6 +44,7 @@ class User(db.Model):
     referred_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     referral_earnings = db.Column(db.Float, default=0.0)
     total_referrals = db.Column(db.Integer, default=0)
+    tracking_code = db.Column(db.String(20), unique=True, nullable=True)
     
     services = db.relationship('Service', backref='provider', lazy=True)
     bookings = db.relationship('Booking', backref='customer', lazy=True)
@@ -663,6 +664,94 @@ def verify_booking(current_user, booking_id):
         }})
     
     return jsonify({'message': 'Invalid verification code'}), 400
+
+
+# Provider Tracking & Sharing System
+@app.route('/api/provider/share/<int:provider_id>', methods=['GET'])
+def generate_provider_share_link(provider_id):
+    """Generate shareable tracking link and QR code for a provider"""
+    provider = User.query.get(provider_id)
+    if not provider or not provider.is_provider:
+        return jsonify({'error': 'Provider not found'}), 404
+    
+    # Generate unique tracking code
+    import secrets
+    if not hasattr(provider, 'tracking_code') or not provider.tracking_code:
+        tracking_code = secrets.token_urlsafe(8)
+        # Store in database (we'll add this field to User model)
+    else:
+        tracking_code = provider.tracking_code
+    
+    # Generate shareable link
+    base_url = request.host_url.rstrip('/')
+    share_link = f"{base_url}/track/{tracking_code}"
+    
+    # Generate QR code URL
+    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={share_link}"
+    
+    return jsonify({
+        'provider_id': provider_id,
+        'provider_name': provider.full_name,
+        'tracking_code': tracking_code,
+        'share_link': share_link,
+        'qr_code_url': qr_url,
+        'qr_download_url': f"https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data={share_link}"
+    })
+
+@app.route('/api/provider/stats/<tracking_code>', methods=['GET'])
+def get_provider_tracking_stats(tracking_code):
+    """Get statistics for a provider using their tracking code"""
+    provider = User.query.filter_by(tracking_code=tracking_code).first()
+    if not provider:
+        return jsonify({'error': 'Invalid tracking code'}), 404
+    
+    # Get provider's services
+    services = Service.query.filter_by(provider_id=provider.id).all()
+    
+    # Get bookings
+    bookings = Booking.query.filter(
+        Booking.service_id.in_([s.id for s in services])
+    ).all()
+    
+    # Calculate stats
+    total_bookings = len(bookings)
+    completed_bookings = len([b for b in bookings if b.status == 'completed'])
+    total_revenue = sum([b.total_price for b in bookings if b.status == 'completed'])
+    
+    # Get reviews
+    reviews = Review.query.filter(
+        Review.service_id.in_([s.id for s in services])
+    ).all()
+    
+    avg_rating = sum([r.rating for r in reviews]) / len(reviews) if reviews else 0
+    
+    return jsonify({
+        'provider_name': provider.full_name,
+        'total_services': len(services),
+        'total_bookings': total_bookings,
+        'completed_bookings': completed_bookings,
+        'total_revenue': total_revenue,
+        'average_rating': round(avg_rating, 2),
+        'total_reviews': len(reviews),
+        'services': [{
+            'id': s.id,
+            'name': s.name,
+            'category': s.category,
+            'price': s.price
+        } for s in services]
+    })
+
+@app.route('/track/<tracking_code>')
+def track_provider(tracking_code):
+    """Landing page for tracked provider links"""
+    provider = User.query.filter_by(tracking_code=tracking_code).first()
+    if not provider:
+        return "Invalid tracking link", 404
+    
+    # Log the visit (we can add a tracking table later)
+    # For now, redirect to provider's services
+    return redirect(f'/?provider={provider.id}')
+
 
 if __name__ == '__main__':
     with app.app_context():

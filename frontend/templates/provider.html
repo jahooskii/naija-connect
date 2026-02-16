@@ -733,3 +733,206 @@
     </script>
 </body>
 </html>
+
+<!-- Add Share & Track Section to Provider Dashboard -->
+<script>
+// Add to existing provider.js or inline
+async function loadProviderShareLinks() {
+    const userId = localStorage.getItem('userId');
+    
+    try {
+        const response = await fetch(`/api/provider/share/${userId}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Display share section
+            const shareSection = document.getElementById('share-section');
+            if (shareSection) {
+                shareSection.innerHTML = `
+                    <div class="share-card">
+                        <h3>📱 Share Your Services</h3>
+                        <div class="qr-container">
+                            <img src="${data.qr_code_url}" alt="QR Code" class="qr-code">
+                            <a href="${data.qr_download_url}" download="my-qr-code.png" class="btn-download">
+                                Download QR Code
+                            </a>
+                        </div>
+                        
+                        <div class="share-link-container">
+                            <p><strong>Your Tracking Link:</strong></p>
+                            <div class="link-box">
+                                <input type="text" id="tracking-link" value="${data.share_link}" readonly>
+                                <button onclick="copyTrackingLink()" class="btn-copy">Copy</button>
+                            </div>
+                            <p class="tracking-code">Code: <code>${data.tracking_code}</code></p>
+                        </div>
+                        
+                        <div class="share-buttons">
+                            <a href="https://wa.me/?text=Check out my services: ${encodeURIComponent(data.share_link)}" 
+                               target="_blank" class="btn-whatsapp">
+                                Share on WhatsApp
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text=Book my services on Naija Connect&url=${encodeURIComponent(data.share_link)}" 
+                               target="_blank" class="btn-twitter">
+                                Share on Twitter
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading share links:', error);
+    }
+}
+
+function copyTrackingLink() {
+    const linkInput = document.getElementById('tracking-link');
+    linkInput.select();
+    document.execCommand('copy');
+    alert('Link copied to clipboard!');
+}
+
+// Load share links when overview tab is active
+document.addEventListener('DOMContentLoaded', function() {
+    const overviewTab = document.querySelector('[data-tab="overview"]');
+    if (overviewTab) {
+        overviewTab.addEventListener('click', loadProviderShareLinks);
+        loadProviderShareLinks(); // Load immediately
+    }
+});
+</script>
+
+<style>
+.share-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.qr-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.qr-code {
+    width: 250px;
+    height: 250px;
+    margin: 10px auto;
+    display: block;
+}
+
+.btn-download {
+    display: inline-block;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+
+.btn-download:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+.share-link-container {
+    margin: 20px 0;
+}
+
+.link-box {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.link-box input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    background: rgba(255,255,255,0.9);
+}
+
+.btn-copy {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-copy:hover {
+    background: #0b7dda;
+}
+
+.tracking-code {
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+.tracking-code code {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.share-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-whatsapp, .btn-twitter {
+    flex: 1;
+    text-align: center;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-whatsapp {
+    background: #25D366;
+}
+
+.btn-whatsapp:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+}
+
+.btn-twitter {
+    background: #1DA1F2;
+}
+
+.btn-twitter:hover {
+    background: #0d8bd9;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .share-buttons {
+        flex-direction: column;
+    }
+    
+    .qr-code {
+        width: 200px;
+        height: 200px;
+    }
+}
+</style>
