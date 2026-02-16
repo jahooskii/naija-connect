@@ -278,3 +278,71 @@
     <script src="/static/js/service-worker-register.js"></script>
 </body>
 </html>
+
+<!-- Auto QR Code Generation for Users -->
+<script>
+// Add QR code modal for sharing
+function showShareQRCode() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        alert('Please log in to share');
+        return;
+    }
+    
+    // Generate QR code URL for user profile
+    const shareURL = `${window.location.origin}/?ref=${userId}`;
+    const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareURL)}`;
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'qr-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    
+    modal.innerHTML = `
+        <div style="background:white;padding:30px;border-radius:15px;text-align:center;max-width:400px;">
+            <h2 style="margin-top:0;">📱 Share Naija Connect</h2>
+            <img src="${qrCodeURL}" alt="QR Code" style="width:300px;height:300px;margin:20px 0;">
+            <p style="margin:10px 0;"><strong>Your Referral Link:</strong></p>
+            <input type="text" value="${shareURL}" readonly style="width:100%;padding:10px;margin-bottom:15px;border:1px solid #ddd;border-radius:5px;" id="share-url-input">
+            <div style="display:flex;gap:10px;margin-top:20px;">
+                <button onclick="copyShareURL()" style="flex:1;padding:12px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer;">
+                    📋 Copy Link
+                </button>
+                <a href="${qrCodeURL}&format=png&download=1" download="my-qr-code.png" style="flex:1;padding:12px;background:#2196F3;color:white;text-decoration:none;border-radius:8px;display:inline-block;">
+                    💾 Download QR
+                </a>
+            </div>
+            <button onclick="document.getElementById('qr-modal').remove()" style="width:100%;margin-top:15px;padding:12px;background:#f44336;color:white;border:none;border-radius:8px;cursor:pointer;">
+                ✖ Close
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function copyShareURL() {
+    const input = document.getElementById('share-url-input');
+    input.select();
+    document.execCommand('copy');
+    alert('Link copied to clipboard!');
+}
+
+// Add share button to header after login
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('token');
+    if (token) {
+        setTimeout(() => {
+            const header = document.querySelector('header .container') || document.querySelector('header');
+            if (header && !document.getElementById('share-btn')) {
+                const shareBtn = document.createElement('button');
+                shareBtn.id = 'share-btn';
+                shareBtn.innerHTML = '📱 Share';
+                shareBtn.style.cssText = 'padding:10px 20px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;margin-left:10px;';
+                shareBtn.onclick = showShareQRCode;
+                header.appendChild(shareBtn);
+            }
+        }, 1000);
+    }
+});
+</script>

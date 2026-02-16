@@ -1330,6 +1330,35 @@
                 loadSectionData(activeSection.id);
             }
         }, 30000);
-    </script>
+    
+// Auto-load QR code on page load
+function loadShareQRCode() {
+    const appURL = window.location.origin;
+    const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(appURL)}`;
+    const qrDownloadURL = `${qrCodeURL}&format=png&download=1`;
+    
+    // Update QR image if element exists
+    const qrImg = document.getElementById('admin-qr-code');
+    if (qrImg) {
+        qrImg.src = qrCodeURL;
+    }
+    
+    // Update download button
+    const downloadBtn = document.getElementById('download-qr-btn');
+    if (downloadBtn) {
+        downloadBtn.href = qrDownloadURL;
+    }
+    
+    // Update share link
+    const shareLinkInput = document.getElementById('share-link-input');
+    if (shareLinkInput) {
+        shareLinkInput.value = appURL;
+    }
+}
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', loadShareQRCode);
+
+</script>
 </body>
 </html>
