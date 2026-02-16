@@ -7,14 +7,13 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#008751",
+  "theme_color": "#0B0F1A",
   "dir": "ltr",
   "lang": "en",
   "display_override": [
     "window-controls-overlay",
     "standalone",
-    "minimal-ui",
-    "browser"
+    "minimal-ui"
   ],
   "icons": [
     {
